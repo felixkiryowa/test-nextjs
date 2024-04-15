@@ -1,0 +1,301 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model allocate_instruction_types {
+  id                     BigInt    @id @default(autoincrement())
+  user_id                BigInt
+  allocated_instructions String
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+  users                  users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "allocate_instruction_types_user_id_foreign")
+
+  @@index([user_id], map: "allocate_instruction_types_user_id_index")
+}
+
+model branches {
+  id          BigInt    @id @default(autoincrement())
+  branch_name String    @db.VarChar(255)
+  sol_id      String    @db.VarChar(255)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  loans       loans[]
+  users       users[]
+}
+
+model buy_off_statuses {
+  id             BigInt    @id @default(autoincrement())
+  buy_off_status String    @db.VarChar(255)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+}
+
+model comments {
+  id                BigInt    @id @default(autoincrement())
+  loan_id           BigInt
+  added_by          String    @db.VarChar(255)
+  comment           String
+  user_role         String?   @db.VarChar(255)
+  comment_on_return Int?
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+  loans             loans     @relation(fields: [loan_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "comments_loan_id_foreign")
+
+  @@index([comment_on_return], map: "comments_comment_on_return_index")
+  @@index([loan_id], map: "comments_loan_id_index")
+}
+
+model customer_segments {
+  id                    BigInt        @id @default(autoincrement())
+  customer_segment_name String        @db.VarChar(255)
+  product_id            BigInt
+  created_at            DateTime?     @db.Timestamp(0)
+  updated_at            DateTime?     @db.Timestamp(0)
+  product_types         product_types @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "customer_segments_product_id_foreign")
+
+  @@index([product_id], map: "customer_segments_product_id_index")
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement())
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String
+  queue      String
+  payload    String
+  exception  String
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model job_families {
+  id              BigInt        @id @default(autoincrement())
+  job_family_name String        @db.VarChar(255)
+  product_id      BigInt
+  created_at      DateTime?     @db.Timestamp(0)
+  updated_at      DateTime?     @db.Timestamp(0)
+  product_types   product_types @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "job_families_product_id_foreign")
+
+  @@index([product_id], map: "job_families_product_id_index")
+}
+
+model jobs {
+  id           BigInt @id @default(autoincrement())
+  queue        String @db.VarChar(255)
+  payload      String
+  attempts     Int    @db.SmallInt
+  reserved_at  Int?
+  available_at Int
+  created_at   Int
+
+  @@index([queue], map: "jobs_queue_index")
+}
+
+model loan_categories {
+  id                 BigInt    @id @default(autoincrement())
+  loan_category_name String    @db.VarChar(255)
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+}
+
+model loan_specifics {
+  id                 BigInt    @id @default(autoincrement())
+  loan_specific_name String    @db.VarChar(255)
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+}
+
+model loan_types {
+  id             BigInt        @id @default(autoincrement())
+  loan_type_name String        @db.VarChar(255)
+  product_id     BigInt
+  created_at     DateTime?     @db.Timestamp(0)
+  updated_at     DateTime?     @db.Timestamp(0)
+  product_types  product_types @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "loan_types_product_id_foreign")
+
+  @@index([product_id], map: "loan_types_product_id_index")
+}
+
+model loans {
+  id                                BigInt                @id @default(autoincrement())
+  user_id                           BigInt
+  branch_id                         BigInt
+  loan_type_id                      BigInt
+  account_number                    String                @db.VarChar(255)
+  customer_name                     String                @db.VarChar(255)
+  cif                               String                @db.VarChar(255)
+  customer_address                  String                @db.VarChar(255)
+  customer_city                     String                @db.VarChar(255)
+  phone_number                      String                @db.VarChar(255)
+  customer_branch                   String                @db.VarChar(255)
+  customer_dob                      DateTime              @db.Date
+  documents                         String
+  other_documents                   String?
+  financial_card_no                 String                @db.VarChar(255)
+  loan_category                     String                @db.VarChar(255)
+  sector                            String                @db.VarChar(255)
+  loan_specifics                    String                @db.VarChar(255)
+  loan_account                      String                @db.VarChar(255)
+  loan_term                         String                @db.VarChar(255)
+  interest_rate                     String                @db.VarChar(255)
+  insurance_amount                  String                @db.VarChar(255)
+  insurance_plan_type               String                @db.VarChar(255)
+  job_family                        String                @db.VarChar(255)
+  customer_employer_name            String?               @db.VarChar(255)
+  employer_scheme_code              String?               @db.VarChar(255)
+  scheme_status                     String                @db.VarChar(255)
+  buy_off_status                    String?               @db.VarChar(255)
+  buy_off_bank                      String?               @db.VarChar(255)
+  customer_segment                  String                @db.VarChar(255)
+  loan_type                         String                @db.VarChar(255)
+  sale_code                         String                @db.VarChar(255)
+  amount                            String                @db.VarChar(255)
+  loan_receive_time                 DateTime              @db.Timestamp(0)
+  branch_manager_name               String?               @db.VarChar(255)
+  branch_manager_time               DateTime?             @db.Timestamp(0)
+  cvu_personnel_name                String?               @db.VarChar(255)
+  cvu_personnel_time                DateTime?             @db.Timestamp(0)
+  cvu_team_leader_name              String?               @db.VarChar(255)
+  cvu_team_leader_time              DateTime?             @db.Timestamp(0)
+  cem_personnel_name                String?               @db.VarChar(255)
+  cem_personnel_time                DateTime?             @db.Timestamp(0)
+  cem_team_leader_name              String?               @db.VarChar(255)
+  cem_team_leader_time              DateTime?             @db.Timestamp(0)
+  amu_personnel_name                String?               @db.VarChar(255)
+  amu_personnel_time                DateTime?             @db.Timestamp(0)
+  amu_team_leader_name              String?               @db.VarChar(255)
+  amu_team_leader_time              DateTime?             @db.Timestamp(0)
+  call_back                         String?               @db.VarChar(255)
+  returned_to_branch                Int                   @default(0)
+  mark_as_picked                    Int                   @default(0)
+  loan_priority                     Int                   @default(0)
+  is_prioritized                    Int                   @default(0)
+  loan_parked_by                    Int?
+  status                            String                @db.VarChar(255)
+  created_at                        DateTime?             @db.Timestamp(0)
+  updated_at                        DateTime?             @db.Timestamp(0)
+  sla_status                        Int
+  instruction_picked_by_name        String?               @db.VarChar(255)
+  already_picked_by_cem_officer     Int                   @default(0)
+  already_picked_by_cvu_officer     Int                   @default(0)
+  already_picked_by_amu_officer     Int                   @default(0)
+  already_picked_by_amu_team_leader Int                   @default(0)
+  instruction_picked_by             Int?
+  mark_instruction_has_rework       Int                   @default(0)
+  priority_flag                     Int                   @default(1)
+  comments                          comments[]
+  branches                          branches              @relation(fields: [branch_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "loans_branch_id_foreign")
+  users                             users                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "loans_user_id_foreign")
+  picked_instructions               picked_instructions[]
+
+  @@index([account_number], map: "loans_account_number_index")
+  @@index([branch_id], map: "loans_branch_id_index")
+  @@index([loan_type_id], map: "loans_loan_type_id_index")
+  @@index([priority_flag], map: "loans_priority_flag_index")
+  @@index([status], map: "loans_status_index")
+  @@index([user_id], map: "loans_user_id_index")
+}
+
+model log_activities {
+  id           BigInt    @id @default(autoincrement())
+  subject      String
+  details      String
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+  reference    String?   @db.VarChar(255)
+  user_ip      String?
+  performed_by String?   @db.VarChar(255)
+
+  @@index([reference], map: "log_activities_reference_index")
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement())
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model password_resets {
+  email      String    @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@ignore
+}
+
+model picked_instructions {
+  id           BigInt    @id @default(autoincrement())
+  user_id      BigInt
+  loan_id      BigInt
+  user_profile String?   @db.VarChar(255)
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+  loans        loans     @relation(fields: [loan_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "picked_instructions_loan_id_foreign")
+  users        users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "picked_instructions_user_id_foreign")
+
+  @@index([loan_id], map: "picked_instructions_loan_id_index")
+  @@index([user_id], map: "picked_instructions_user_id_index")
+}
+
+model product_types {
+  id                BigInt              @id @default(autoincrement())
+  product_name      String              @db.VarChar(255)
+  created_at        DateTime?           @db.Timestamp(0)
+  updated_at        DateTime?           @db.Timestamp(0)
+  customer_segments customer_segments[]
+  job_families      job_families[]
+  loan_types        loan_types[]
+}
+
+model roles {
+  id         BigInt    @id @default(autoincrement())
+  role_name  String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model scheme_statuses {
+  id                 BigInt    @id @default(autoincrement())
+  scheme_status_name String    @db.VarChar(255)
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+}
+
+model sectors {
+  id          BigInt    @id @default(autoincrement())
+  sector_name String    @db.VarChar(255)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model users {
+  id                         BigInt                       @id @default(autoincrement())
+  username                   String                       @db.VarChar(255)
+  firstname                  String                       @db.VarChar(255)
+  middlename                 String?                      @db.VarChar(255)
+  lastname                   String                       @db.VarChar(255)
+  user_type                  String                       @db.VarChar(255)
+  email                      String                       @unique(map: "users_email_unique") @db.VarChar(255)
+  status                     Int                          @default(1)
+  login_attempts             Int                          @default(0)
+  last_time_login            DateTime?                    @db.Timestamp(0)
+  last_modified_by           String?                      @db.VarChar(255)
+  branch_id                  BigInt
+  remember_token             String?                      @db.VarChar(100)
+  created_at                 DateTime?                    @db.Timestamp(0)
+  updated_at                 DateTime?                    @db.Timestamp(0)
+  last_session_id            String?                      @db.VarChar(255)
+  approved_by_super_admin    Int                          @default(0)
+  created_by                 String                       @db.VarChar(255)
+  allocate_instruction_types allocate_instruction_types[]
+  loans                      loans[]
+  picked_instructions        picked_instructions[]
+  branches                   branches                     @relation(fields: [branch_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "users_branch_id_foreign")
+
+  @@index([branch_id], map: "users_branch_id_index")
+}
